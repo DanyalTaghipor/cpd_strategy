@@ -2,6 +2,13 @@
 
 
 
+## v1.3.0 (2023-10-16)
+
+### Feature
+
+* feat(cpd): consider high column instead of low column to confirm a range is broken or not ([`93af304`](https://github.com/tradefreq/cpd_strategy/commit/93af3040819044e9cb9d20431be247073ad5a6dd))
+
+
 ## v1.2.0 (2023-10-16)
 
 ### Feature
