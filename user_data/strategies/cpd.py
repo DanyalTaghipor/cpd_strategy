@@ -165,12 +165,14 @@ class CPD(IStrategy):
         if end_index > len(df_data) - 1:
             return False
 
-        piv_confirm_data = df_data.loc[index + 1:end_index]
+        below_base_confirm_data = df_data.loc[index + 1:]
 
-        all_highs_lower = (piv_confirm_data['high'] < piv_confirm_data['kijun_sen']).all()
+        all_highs_lower = (below_base_confirm_data['high'] < below_base_confirm_data['kijun_sen']).all()
 
         if not all_highs_lower:
             return False
+
+        piv_confirm_data = below_base_confirm_data.loc[:end_index]
 
         piv_confirm_data['candle direction'] = 'Bullish'
         piv_confirm_data.loc[piv_confirm_data['open'] > piv_confirm_data['close'], 'candle direction'] = 'Bearish'
