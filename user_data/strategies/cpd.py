@@ -304,8 +304,10 @@ class CPD(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with entry columns populated
         """
-
-        if dataframe['valid_signal'].iloc[-1] == 1:
+        dataframe.loc[dataframe['valid_signal'] == 1,
+            'enter_long'] = 1
+        if dataframe['enter_long'].iloc[-1] == 1:
+            metadata['strategy_name'] = self.__class__.__name__
             data = dataframe.tail(self.plot_candle_count)
 
             self.custom_notif.send_custom_message(self.dp, data, metadata,
