@@ -63,7 +63,7 @@ class CPD(IStrategy):
     # trailing_stop_positive_offset = 0.0  # Disabled / not configured
 
     # Optimal timeframe for the strategy.
-    timeframe = '1m'
+    timeframe = '4h'
 
     # Run "populate_indicators()" only for new candle.
     process_only_new_candles = True
@@ -80,8 +80,8 @@ class CPD(IStrategy):
 
     confirmation_pivot_candles = 2  # Number of Bearish/Bullish Candles After Pivot to Confirm It
 
-    confirmation_candles = 5 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
-    close_confirmation_range = True # If True, Close of Candle Should Break Range
+    confirmation_candles = 4 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
+    close_confirmation_range = False # If True, Close of Candle Should Break Range
 
     # Number of candles the strategy requires before producing valid signals
     startup_candle_count: int = 70
@@ -269,7 +269,7 @@ class CPD(IStrategy):
 
 
         ############## Long Signals ##############
-        break_range_src_long = dataframe['close'] if self.close_confirmation_range else dataframe['low']
+        break_range_src_long = dataframe['close'] if self.close_confirmation_range else dataframe['high']
 
         # Valid Ranges
         dataframe['long_ranges'] = np.where(break_range_src_long < dataframe['leading_senkou_span_b'], 1, np.nan)
