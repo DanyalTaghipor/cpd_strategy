@@ -2,6 +2,13 @@
 
 
 
+## v1.2.0 (2023-10-16)
+
+### Feature
+
+* feat(cpd): check if all candles are below base line ([`b47816f`](https://github.com/tradefreq/cpd_strategy/commit/b47816f003f8d588e8e5248202e78c9daeb998ad))
+
+
 ## v1.1.0 (2023-10-16)
 
 ### Feature
