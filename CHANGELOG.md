@@ -2,6 +2,13 @@
 
 
 
+## v1.4.0 (2023-10-17)
+
+### Feature
+
+* feat(cpd): add cpd for multiple timeframes ([`d376d9a`](https://github.com/tradefreq/cpd_strategy/commit/d376d9a900cd225a39818f3b5395e8b1b638b1ed))
+
+
 ## v1.3.0 (2023-10-16)
 
 ### Feature
