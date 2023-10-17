@@ -17,7 +17,7 @@ from shared.custom_classes import CustomSender
 
 
 # This class is a sample. Feel free to customize it.
-class CPD(IStrategy):
+class CPD1H(IStrategy):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.custom_notif = CustomSender()
@@ -63,7 +63,7 @@ class CPD(IStrategy):
     # trailing_stop_positive_offset = 0.0  # Disabled / not configured
 
     # Optimal timeframe for the strategy.
-    timeframe = '4h'
+    timeframe = '1h'
 
     # Run "populate_indicators()" only for new candle.
     process_only_new_candles = True
@@ -81,7 +81,7 @@ class CPD(IStrategy):
     confirmation_pivot_candles = 2  # Number of Bearish/Bullish Candles After Pivot to Confirm It
 
     confirmation_candles = 4 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
-    close_confirmation_range = False # If True, Close of Candle Should Break Range
+    close_confirmation_range = True # If True, Close of Candle Should Break Range
 
     # Number of candles the strategy requires before producing valid signals
     startup_candle_count: int = 70
@@ -310,6 +310,7 @@ class CPD(IStrategy):
             'enter_long'] = 1
         if dataframe['enter_long'].iloc[-1] == 1:
             metadata['strategy_name'] = self.__class__.__name__
+            metadata['timeframe'] = self.timeframe
             data = dataframe.tail(self.plot_candle_count)
 
             self.custom_notif.send_custom_message(self.dp, data, metadata,
