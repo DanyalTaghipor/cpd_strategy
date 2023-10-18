@@ -13,7 +13,7 @@ from freqtrade.strategy import (IStrategy)
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 import numpy as np
 from scipy.ndimage import label, sum
-from shared.custom_classes import CustomSender
+from shared.custom_classes import CustomSender, CustomMethods
 
 
 # This class is a sample. Feel free to customize it.
@@ -21,6 +21,7 @@ class CPD1H(IStrategy):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.custom_notif = CustomSender()
+        self.custom_methods = CustomMethods()
     """
     This is a sample strategy to inspire you.
     More information in https://www.freqtrade.io/en/latest/strategy-customization/
@@ -82,6 +83,7 @@ class CPD1H(IStrategy):
 
     confirmation_candles = 4 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
     close_confirmation_range = True # If True, Close of Candle Should Break Range
+    divergence_confirmation = True # If True, CPD needs divergence confirmation too
 
     # Number of candles the strategy requires before producing valid signals
     startup_candle_count: int = 70
@@ -135,107 +137,6 @@ class CPD1H(IStrategy):
         """
         return []
 
-    def confirm_long_pivot(self, df_data, index, confirm_window_size):
-        """
-        Confirm if the given index in a dataframe qualifies as a long pivot based on candle direction and kijun_sen values.
-
-        Parameters
-        ----------
-        df_data : DataFrame
-            The dataframe containing historical market data. Expected to have ohlcv and ichi columns.
-        index : int
-            The index in the dataframe to check for a long pivot.
-        confirm_window_size : int
-            The size of the window after the given index to include in the analysis.
-
-        Returns
-        -------
-        bool
-            Returns True if the conditions for a long pivot are satisfied, else False.
-
-        Notes
-        -----
-        A long pivot is confirmed if:
-        1. All candles in the window after the index are bullish.
-        2. All 'kijun_sen' values in the window are the same.
-        """
-
-        end_index = index + confirm_window_size
-
-        if end_index > len(df_data) - 1:
-            return False
-
-        below_base_confirm_data = df_data.loc[index + 1:]
-
-        all_highs_lower = (below_base_confirm_data['high'] < below_base_confirm_data['kijun_sen']).all()
-
-        if not all_highs_lower:
-            return False
-
-        piv_confirm_data = below_base_confirm_data.loc[:end_index]
-
-        piv_confirm_data['candle direction'] = 'Bullish'
-        piv_confirm_data.loc[piv_confirm_data['open'] > piv_confirm_data['close'], 'candle direction'] = 'Bearish'
-
-        all_bullish = (piv_confirm_data['candle direction'] == 'Bullish').all()
-
-        is_all_base_same = piv_confirm_data['kijun_sen'].nunique() == 1
-
-        is_valid = all_bullish and is_all_base_same
-
-        return is_valid
-
-    def ichimoku(self, dataframe, conversion_line_period=9, base_line_periods=26,
-                 laggin_span=52, displacement=26):
-        """
-        Ichimoku cloud indicator
-        Note: Do not use chikou_span for backtesting.
-            It looks into the future, is not printed by most charting platforms.
-            It is only useful for visual analysis
-        :param dataframe: Dataframe containing OHLCV data
-        :param conversion_line_period: Conversion line Period (defaults to 9)
-        :param base_line_periods: Base line Periods (defaults to 26)
-        :param laggin_span: Lagging span period
-        :param displacement: Displacement (shift) - defaults to 26
-        :return: Dict containing the following keys:
-            tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b, leading_senkou_span_a,
-            leading_senkou_span_b, chikou_span, cloud_green, cloud_red
-        """
-
-        tenkan_sen = (dataframe['high'].rolling(window=conversion_line_period).max()
-                      + dataframe['low'].rolling(window=conversion_line_period).min()) / 2
-
-        kijun_sen = (dataframe['high'].rolling(window=base_line_periods).max()
-                     + dataframe['low'].rolling(window=base_line_periods).min()) / 2
-
-        senkou_span_a = (tenkan_sen + kijun_sen) / 2
-
-        senkou_span_b = (dataframe['high'].rolling(window=laggin_span).max()
-                                 + dataframe['low'].rolling(window=laggin_span).min()) / 2
-
-        leading_senkou_span_a = senkou_span_a.shift(displacement)
-
-        leading_senkou_span_b = senkou_span_b.shift(displacement)
-
-
-        chikou_span = dataframe['close'].shift(-displacement)
-
-        cloud_green = (senkou_span_a > senkou_span_b)
-        cloud_red = (senkou_span_b > senkou_span_a)
-
-        return {
-            'tenkan_sen': tenkan_sen,
-            'kijun_sen': kijun_sen,
-            'senkou_span_a': senkou_span_a,
-            'senkou_span_b': senkou_span_b,
-            'leading_senkou_span_a': leading_senkou_span_a,
-            'leading_senkou_span_b': leading_senkou_span_b,
-            'chikou_span': chikou_span,
-            'cloud_green': cloud_green,
-            'cloud_red': cloud_red,
-        }
-
-
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
         Adds several different TA indicators to the given DataFrame
@@ -250,7 +151,7 @@ class CPD1H(IStrategy):
 
 
         # Ichi
-        ichi_ = self.ichimoku(dataframe=dataframe,
+        ichi_ = self.custom_methods.ichimoku(dataframe=dataframe,
                               conversion_line_period=self.conversion_line_period,
                               base_line_periods=self.base_line_periods,
                               laggin_span=self.laggin_span,
@@ -289,8 +190,9 @@ class CPD1H(IStrategy):
 
         group_indices = dataframe[(labels_long == group_label) & (dataframe['long_ranges'] == 1)].index
         if len(group_indices) > 0:
-            if self.confirm_long_pivot(dataframe, last_min_indices,
-                                       confirm_window_size=self.confirmation_pivot_candles):
+            if self.custom_methods.confirm_long_pivot(dataframe, last_min_indices,
+                                                      confirm_window_size=self.confirmation_pivot_candles,
+                                                      confirm_by_divergence=self.divergence_confirmation):
 
                 last_index = group_indices[-1]
                 dataframe.loc[last_index, 'valid_signal'] = 1
