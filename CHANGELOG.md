@@ -2,6 +2,15 @@
 
 
 
+## v1.5.0 (2023-10-18)
+
+### Feature
+
+* feat(cpd): adding divergence confirmation ([`8f38139`](https://github.com/tradefreq/cpd_strategy/commit/8f381394b31f98182d875b8482739a5cdef9dde2))
+
+* feat(shared): seperate common functions in cpd strategy and put them in one file and adding divergence ([`c947f6e`](https://github.com/tradefreq/cpd_strategy/commit/c947f6e350c70c5841a1f61e939001ea0ef1526f))
+
+
 ## v1.4.0 (2023-10-17)
 
 ### Feature
