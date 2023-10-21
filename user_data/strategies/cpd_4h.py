@@ -85,6 +85,10 @@ class CPD4H(IStrategy):
     close_confirmation_range = True # If True, Close of Candle Should Break Range
     divergence_confirmation = True # If True, CPD needs divergence confirmation too
 
+    # Determines whether to continuously send the CPD signal regardless of its freshness.
+    # If set to True, the same CPD signal will be sent multiple times until it becomes invalid.
+    send_repetitive_signal = False
+
     # Number of candles the strategy requires before producing valid signals
     startup_candle_count: int = 70
 
@@ -192,7 +196,8 @@ class CPD4H(IStrategy):
         if len(group_indices) > 0:
             if self.custom_methods.confirm_long_pivot(dataframe, last_min_indices,
                                                       confirm_window_size=self.confirmation_pivot_candles,
-                                                      confirm_by_divergence=self.divergence_confirmation):
+                                                      confirm_by_divergence=self.divergence_confirmation,
+                                                      send_repetitive_signal=self.send_repetitive_signal):
 
                 last_index = group_indices[-1]
                 dataframe.loc[last_index, 'valid_signal'] = 1

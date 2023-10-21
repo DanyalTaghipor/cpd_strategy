@@ -24,33 +24,41 @@ class CustomSender:
 
 class CustomMethods:
 
-    def confirm_long_pivot(self, df_data, index, confirm_window_size, confirm_by_divergence=True):
+    def confirm_long_pivot(self, df_data, index, confirm_window_size, send_repetitive_signal,
+                           confirm_by_divergence=True):
         """
-        Confirm if the given index in a dataframe qualifies as a long pivot based on candle direction and kijun_sen values.
+        Confirm whether the given index in a dataframe qualifies as a long pivot, considering
+        candle direction, kijun_sen values, and optionally divergence.
 
         Parameters
         ----------
         df_data : DataFrame
-            The dataframe containing historical market data. Expected to have ohlcv and ichi columns.
+            The historical market data, expected to contain OHLCV and Ichimoku columns.
         index : int
-            The index in the dataframe to check for a long pivot.
+            The index in the dataframe to verify for a long pivot.
         confirm_window_size : int
-            The size of the window after the given index to include in the analysis.
+            The number of candles after the given index to consider for confirmation.
+        send_repetitive_signal : bool
+            Determines if the same CPD signal should be sent repeatedly until it becomes invalid.
+        confirm_by_divergence : bool, optional
+            If True, the pivot confirmation will additionally consider divergence. Default is True.
 
         Returns
         -------
         bool
-            Returns True if the conditions for a long pivot are satisfied, else False.
+            True if the specified conditions for a long pivot are met, otherwise False.
 
         Notes
         -----
         A long pivot is confirmed if:
-        1. All candles in the window after the index are bullish.
-        2. All 'kijun_sen' values in the window are the same.
-        :param confirm_by_divergence:
+        1. All candles in the confirmation window post the specified index are bullish.
+        2. The 'kijun_sen' values within the confirmation window are consistent.
         """
 
         end_index = index + confirm_window_size
+
+        if not send_repetitive_signal and len(df_data) - 1 > end_index:
+            return False
 
         if end_index > len(df_data) - 1:
             return False
