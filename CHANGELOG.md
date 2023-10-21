@@ -2,6 +2,13 @@
 
 
 
+## v1.6.0 (2023-10-21)
+
+### Feature
+
+* feat(cpd): Add &#39;send_repetitive_signal&#39; parameter for continuous CPD signal sending, regardless of freshness. ([`cd1ccb4`](https://github.com/tradefreq/cpd_strategy/commit/cd1ccb4167314b36f43701934263eb652b2e6706))
+
+
 ## v1.5.0 (2023-10-18)
 
 ### Feature
