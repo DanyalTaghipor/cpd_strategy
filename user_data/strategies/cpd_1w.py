@@ -17,7 +17,7 @@ from shared.custom_classes import CustomSender, CustomMethods
 
 
 # This class is a sample. Feel free to customize it.
-class CPD4H(IStrategy):
+class CPD1W(IStrategy):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.custom_notif = CustomSender()
@@ -64,7 +64,7 @@ class CPD4H(IStrategy):
     # trailing_stop_positive_offset = 0.0  # Disabled / not configured
 
     # Optimal timeframe for the strategy.
-    timeframe = '4h'
+    timeframe = '1w'
 
     # Run "populate_indicators()" only for new candle.
     process_only_new_candles = True

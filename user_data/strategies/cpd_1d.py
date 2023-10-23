@@ -83,7 +83,7 @@ class CPD1D(IStrategy):
 
     confirmation_candles = 4 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
     close_confirmation_range = True # If True, Close of Candle Should Break Range
-    divergence_confirmation = True # If True, CPD needs divergence confirmation too
+    divergence_confirmation = False # If True, CPD needs divergence confirmation too
 
     # Determines whether to continuously send the CPD signal regardless of its freshness.
     # If set to True, the same CPD signal will be sent multiple times until it becomes invalid.
