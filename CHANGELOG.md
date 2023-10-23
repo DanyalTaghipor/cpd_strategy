@@ -2,6 +2,13 @@
 
 
 
+## v1.7.0 (2023-10-23)
+
+### Feature
+
+* feat(CPD): add and activate weekly and deactive hourly timeframe ([`41e1246`](https://github.com/tradefreq/cpd_strategy/commit/41e12464187084855d86ad6b1ff15347e781e9e5))
+
+
 ## v1.6.0 (2023-10-21)
 
 ### Feature
