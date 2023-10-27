@@ -33,9 +33,6 @@ x-service-template: &service-template
     - "./user_data:/freqtrade/user_data"
     - "./shared:/freqtrade/shared"
 
-  environment:
-    - PYTHONPATH=/freqtrade
-
   labels:
     - "traefik.http.services.freqcpd.loadbalancer.sticky.cookie.name=cpdfreq"
   networks:
@@ -46,6 +43,7 @@ services:
     <<: *service-template
 
     environment:
+      - PYTHONPATH=/freqtrade
       - TIMEFRAME=1w
 
     command: >
@@ -63,6 +61,7 @@ services:
     <<: *service-template
 
     environment:
+      - PYTHONPATH=/freqtrade
       - TIMEFRAME=4h
 
     command: >
@@ -80,6 +79,7 @@ services:
     <<: *service-template
 
     environment:
+      - PYTHONPATH=/freqtrade
       - TIMEFRAME=1d
 
     command: >
