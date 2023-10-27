@@ -12,12 +12,13 @@ from freqtrade.strategy import (IStrategy)
 # Add your lib to import here
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 import numpy as np
+import os
 from scipy.ndimage import label, sum
 from shared.custom_classes import CustomSender, CustomMethods
 
 
 # This class is a sample. Feel free to customize it.
-class CPD1W(IStrategy):
+class CPD(IStrategy):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.custom_notif = CustomSender()
@@ -64,7 +65,7 @@ class CPD1W(IStrategy):
     # trailing_stop_positive_offset = 0.0  # Disabled / not configured
 
     # Optimal timeframe for the strategy.
-    timeframe = '1w'
+    timeframe = os.environ.get('TIMEFRAME', '5m')
 
     # Run "populate_indicators()" only for new candle.
     process_only_new_candles = True

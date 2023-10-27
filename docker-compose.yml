@@ -4,6 +4,12 @@ networks:
   freq_net:
     external: true
 
+x-shared-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "1m"
+    max-file: "1"
+
 x-shared-deploy: &default-deploy
   mode: replicated
   replicas: 1
@@ -16,47 +22,73 @@ x-shared-deploy: &default-deploy
 
 x-service-template: &service-template
   image: freqtradeorg/freqtrade:develop_plot
+
+  logging:
+    <<: *logging
+
   deploy:
     <<: *default-deploy
+
   volumes:
     - "./user_data:/freqtrade/user_data"
     - "./shared:/freqtrade/shared"
+
   environment:
     - PYTHONPATH=/freqtrade
+
   labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.freqcpd.entrypoints=http"
-    - "traefik.http.routers.freqcpd.rule=Host(`cpd.freq.localhost`)"
-    - "traefik.http.services.freqcpd.loadbalancer.server.port=8080"
     - "traefik.http.services.freqcpd.loadbalancer.sticky.cookie.name=cpdfreq"
   networks:
     - freq_net
 
 services:
-
   cpd_1w:
     <<: *service-template
+
+    environment:
+      - TIMEFRAME=1w
+
     command: >
       trade
-      --logfile /freqtrade/user_data/logs/freqtrade.log
       --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
       --config /freqtrade/user_data/config.json
-      --strategy CPD1W
+      --strategy CPD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cpd1w.entrypoints=http"
+      - "traefik.http.routers.cpd1w.rule=Host(`cpd1w.freq.localhost`)"
+      - "traefik.http.services.cpd1w.loadbalancer.server.port=8080"
 
   cpd_4h:
     <<: *service-template
+
+    environment:
+      - TIMEFRAME=4h
+
     command: >
       trade
-      --logfile /freqtrade/user_data/logs/freqtrade.log
       --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
       --config /freqtrade/user_data/config.json
-      --strategy CPD4H
+      --strategy CPD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cpd4h.entrypoints=http"
+      - "traefik.http.routers.cpd4h.rule=Host(`cpd4h.freq.localhost`)"
+      - "traefik.http.services.cpd4h.loadbalancer.server.port=8080"
 
   cpd_1d:
     <<: *service-template
+
+    environment:
+      - TIMEFRAME=1d
+
     command: >
       trade
-      --logfile /freqtrade/user_data/logs/freqtrade.log
       --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
       --config /freqtrade/user_data/config.json
-      --strategy CPD1D
+      --strategy CPD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cpd1d.entrypoints=http"
+      - "traefik.http.routers.cpd1d.rule=Host(`cpd1d.freq.localhost`)"
+      - "traefik.http.services.cpd1d.loadbalancer.server.port=8080"
