@@ -2,6 +2,13 @@
 
 
 
+## v2.1.0 (2023-10-27)
+
+### Feature
+
+* feat(cpd_config): add rate limit to avoid ddos protection error ([`b4d18f1`](https://github.com/tradefreq/cpd_strategy/commit/b4d18f18926df0189d11a08e0881f53336c199e3))
+
+
 ## v2.0.0 (2023-10-27)
 
 ### Breaking
