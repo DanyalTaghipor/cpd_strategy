@@ -2,6 +2,13 @@
 
 
 
+## v2.1.1 (2023-10-27)
+
+### Fix
+
+* fix(cpd_compose): redefine the location of enviroment section from anchor shared script to each service ([`aed1a32`](https://github.com/tradefreq/cpd_strategy/commit/aed1a32a5eddae7f8a6408857c4c99fa6d9aa48d))
+
+
 ## v2.1.0 (2023-10-27)
 
 ### Feature
