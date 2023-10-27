@@ -2,6 +2,15 @@
 
 
 
+## v2.0.0 (2023-10-27)
+
+### Breaking
+
+* feat(cpd): refactor cpd strategy codes.
+
+BREAKING CHANGE: remove duplicated files for different timeframes and use enviroment varaible to define timeframe for each service based on one strategy file. ([`e387226`](https://github.com/tradefreq/cpd_strategy/commit/e38722679a47f26a725488a45b68bbe56bd87967))
+
+
 ## v1.7.0 (2023-10-23)
 
 ### Feature
