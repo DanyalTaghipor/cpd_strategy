@@ -2,6 +2,13 @@
 
 
 
+## v2.3.0 (2023-10-28)
+
+### Feature
+
+* feat(config): add ratelimit ([`3509a7e`](https://github.com/tradefreq/cpd_strategy/commit/3509a7eb11b464b71f4f59ced925ea80d7f39045))
+
+
 ## v2.2.0 (2023-10-28)
 
 ### Feature
