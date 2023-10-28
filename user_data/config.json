@@ -36,10 +36,7 @@
         "key": "",
         "secret": "",
         "ccxt_config": {},
-        "ccxt_async_config": {
-            "enableRateLimit": true,
-            "rateLimit": 3100
-        },
+        "ccxt_async_config": {},
         "pair_whitelist": [
             "SPELL/USDT:USDT",
             "DENT/USDT:USDT",
