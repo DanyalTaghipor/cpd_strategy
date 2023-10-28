@@ -2,6 +2,17 @@
 
 
 
+## v2.2.0 (2023-10-28)
+
+### Feature
+
+* feat(config): modify webhook url (from plotter to plotter_main) ([`3552ff5`](https://github.com/tradefreq/cpd_strategy/commit/3552ff5a4afde2b3d2e8fe15f34492110057c767))
+
+### Fix
+
+* fix(config): remove ratelimit config ([`6268112`](https://github.com/tradefreq/cpd_strategy/commit/62681126e7c84ec42960db844bb5605fca42493e))
+
+
 ## v2.1.1 (2023-10-27)
 
 ### Fix
