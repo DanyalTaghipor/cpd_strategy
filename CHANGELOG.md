@@ -2,6 +2,13 @@
 
 
 
+## v2.4.0 (2023-11-04)
+
+### Feature
+
+* feat(docker-compose): add 1h timeframe to cpd as a new service ([`acb7128`](https://github.com/tradefreq/cpd_strategy/commit/acb71284188007e47ce2279a1a055731984e2919))
+
+
 ## v2.3.0 (2023-10-28)
 
 ### Feature
