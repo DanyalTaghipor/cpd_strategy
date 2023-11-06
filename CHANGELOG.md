@@ -2,6 +2,15 @@
 
 
 
+## v2.5.0 (2023-11-06)
+
+### Feature
+
+* feat(docker-compose): add 15m and 5m timeframes to cpd as new services ([`20cae3a`](https://github.com/tradefreq/cpd_strategy/commit/20cae3ac4a66cb2a16ad6f99003c455bd79129e6))
+
+* feat(cpd): add and enable short signaling section ([`c382166`](https://github.com/tradefreq/cpd_strategy/commit/c382166627b6983910f89f0d2e1dd7f9aba4d3e0))
+
+
 ## v2.4.0 (2023-11-04)
 
 ### Feature
