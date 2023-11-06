@@ -2,6 +2,19 @@
 
 
 
+## v2.6.0 (2023-11-06)
+
+### Feature
+
+* feat(cpd_docker-compose): add new env in docker-compose (CONFIRMATION_PIVOT_CANDLES) to handle corresponding var in cpd ([`ecbf0cc`](https://github.com/tradefreq/cpd_strategy/commit/ecbf0cc6f0e93c687d93610bd8252e379f857f41))
+
+### Refactor
+
+* refactor(docker-compose): remove 5m cpd service ([`d2781b3`](https://github.com/tradefreq/cpd_strategy/commit/d2781b3d9dc55665fe2594de4af367a63a7a755d))
+
+* refactor(config): disable rate limit options ([`3601eb6`](https://github.com/tradefreq/cpd_strategy/commit/3601eb6abbc299e8122be444791c20d8f7fbb91c))
+
+
 ## v2.5.0 (2023-11-06)
 
 ### Feature
