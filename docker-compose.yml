@@ -93,6 +93,43 @@ services:
       - "traefik.http.routers.cpd1h.rule=Host(`cpd1h.freq.localhost`)"
       - "traefik.http.services.cpd1h.loadbalancer.server.port=8080"
 
+  cpd_15m:
+    <<: *service-template
+
+    environment:
+      - PYTHONPATH=/freqtrade
+      - TIMEFRAME=15m
+
+    command: >
+      trade
+      --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
+      --config /freqtrade/user_data/config.json
+      --strategy CPD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cpd15m.entrypoints=http"
+      - "traefik.http.routers.cpd15m.rule=Host(`cpd15m.freq.localhost`)"
+      - "traefik.http.services.cpd15m.loadbalancer.server.port=8080"
+
+
+  cpd_5m:
+    <<: *service-template
+
+    environment:
+      - PYTHONPATH=/freqtrade
+      - TIMEFRAME=5m
+
+    command: >
+      trade
+      --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
+      --config /freqtrade/user_data/config.json
+      --strategy CPD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cpd5m.entrypoints=http"
+      - "traefik.http.routers.cpd5m.rule=Host(`cpd5m.freq.localhost`)"
+      - "traefik.http.services.cpd5m.loadbalancer.server.port=8080"
+
   cpd_1d:
     <<: *service-template
 
