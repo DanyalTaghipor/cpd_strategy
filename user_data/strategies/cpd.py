@@ -80,7 +80,7 @@ class CPD(IStrategy):
     laggin_span = 52
     displacement = 26
 
-    confirmation_pivot_candles = 2  # Number of Bearish/Bullish Candles After Pivot to Confirm It
+    confirmation_pivot_candles = int(os.environ.get('CONFIRMATION_PIVOT_CANDLES', '1'))  # Number of Bearish/Bullish Candles After Pivot to Confirm It
 
     confirmation_candles = 4 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
     close_confirmation_range = True # If True, Close of Candle Should Break Range

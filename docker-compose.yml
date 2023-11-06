@@ -45,6 +45,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=1w
+      - CONFIRMATION_PIVOT_CANDLES=2
 
     command: >
       trade
@@ -57,12 +58,32 @@ services:
       - "traefik.http.routers.cpd1w.rule=Host(`cpd1w.freq.localhost`)"
       - "traefik.http.services.cpd1w.loadbalancer.server.port=8080"
 
+  cpd_1d:
+    <<: *service-template
+
+    environment:
+      - PYTHONPATH=/freqtrade
+      - TIMEFRAME=1d
+      - CONFIRMATION_PIVOT_CANDLES=2
+
+    command: >
+      trade
+      --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
+      --config /freqtrade/user_data/config.json
+      --strategy CPD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cpd1d.entrypoints=http"
+      - "traefik.http.routers.cpd1d.rule=Host(`cpd1d.freq.localhost`)"
+      - "traefik.http.services.cpd1d.loadbalancer.server.port=8080"
+
   cpd_4h:
     <<: *service-template
 
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=4h
+      - CONFIRMATION_PIVOT_CANDLES=2
 
     command: >
       trade
@@ -81,6 +102,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=1h
+      - CONFIRMATION_PIVOT_CANDLES=1
 
     command: >
       trade
@@ -99,6 +121,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=15m
+      - CONFIRMATION_PIVOT_CANDLES=1
 
     command: >
       trade
@@ -110,21 +133,3 @@ services:
       - "traefik.http.routers.cpd15m.entrypoints=http"
       - "traefik.http.routers.cpd15m.rule=Host(`cpd15m.freq.localhost`)"
       - "traefik.http.services.cpd15m.loadbalancer.server.port=8080"
-
-  cpd_1d:
-    <<: *service-template
-
-    environment:
-      - PYTHONPATH=/freqtrade
-      - TIMEFRAME=1d
-
-    command: >
-      trade
-      --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
-      --config /freqtrade/user_data/config.json
-      --strategy CPD
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.cpd1d.entrypoints=http"
-      - "traefik.http.routers.cpd1d.rule=Host(`cpd1d.freq.localhost`)"
-      - "traefik.http.services.cpd1d.loadbalancer.server.port=8080"
