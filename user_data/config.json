@@ -35,11 +35,8 @@
         "name": "binance",
         "key": "",
         "secret": "",
-        "ccxt_config": {"enableRateLimit": true},
-        "ccxt_async_config": {
-            "enableRateLimit": true,
-            "rateLimit": 4000
-        },
+        "ccxt_config": {},
+        "ccxt_async_config": {},
         "pair_whitelist": [
             "SPELL/USDT:USDT",
             "DENT/USDT:USDT",
