@@ -44,7 +44,7 @@ class CPD(IStrategy):
     INTERFACE_VERSION = 3
 
     # Can this strategy go short?
-    can_short: bool = False
+    can_short: bool = True
 
     # Minimal ROI designed for the strategy.
     # This attribute will be overridden if the config file contains "minimal_roi".
@@ -119,12 +119,21 @@ class CPD(IStrategy):
         }
     }
 
-    telegram_plot_config = {
+    telegram_plot_config_long = {
         'main_plot': {
             'tenkan_sen': {'color': 'orange'},
             'kijun_sen': {'color': 'blue'},
             'leading_senkou_span_b': {'color': 'red'},
             'minimum_lines': {'color': 'aqua'},
+        }
+    }
+
+    telegram_plot_config_short = {
+        'main_plot': {
+            'tenkan_sen': {'color': 'orange'},
+            'kijun_sen': {'color': 'blue'},
+            'leading_senkou_span_b': {'color': 'red'},
+            'maximum_lines': {'color': 'aqua'},
         }
     }
 
@@ -173,6 +182,8 @@ class CPD(IStrategy):
         dataframe['cloud_green'] = ichi_['cloud_green']
         dataframe['cloud_red'] = ichi_['cloud_red']
 
+        # Valid Signals
+        dataframe['valid_signal'] = np.nan
 
         ############## Long Signals ##############
         break_range_src_long = dataframe['close'] if self.close_confirmation_range else dataframe['high']
@@ -187,8 +198,6 @@ class CPD(IStrategy):
         dataframe.loc[dataframe['long_ranges'] == 1, 'minimum_lines'] = dataframe.groupby(labels_long)['low'].transform('min')
         last_min_indices = dataframe.groupby(labels_long)['low'].idxmin().values[-1]
 
-        # Limit Prices
-        dataframe['valid_signal'] = np.nan
         dataframe['long_target_price_entry'] = np.nan
 
         group_label = labels_long[last_min_indices]
@@ -205,6 +214,35 @@ class CPD(IStrategy):
 
         ############## Long Signals ##############
 
+        ############## Short Signals ##############
+        break_range_src_short = dataframe['close'] if self.close_confirmation_range else dataframe['low']
+
+        # Valid Ranges
+        dataframe['short_ranges'] = np.where(break_range_src_short > dataframe['leading_senkou_span_b'], 1, np.nan)
+        labels_short, num_features_short = label(dataframe['short_ranges'] == 1)
+        counts_short = sum(dataframe['short_ranges'] == 1, labels_short, range(num_features_short + 1))
+        dataframe.loc[counts_short[labels_short] < self.confirmation_candles, 'short_ranges'] = np.nan
+
+        # Maximum Lines
+        dataframe.loc[dataframe['short_ranges'] == 1, 'maximum_lines'] = dataframe.groupby(labels_short)[
+            'high'].transform('max')
+        last_max_indices = dataframe.groupby(labels_short)['high'].idxmax().values[-1]
+
+        dataframe['short_target_price_entry'] = np.nan
+
+        group_label = labels_short[last_max_indices]
+
+        group_indices = dataframe[(labels_short == group_label) & (dataframe['short_ranges'] == 1)].index
+        if len(group_indices) > 0:
+            if self.custom_methods.confirm_short_pivot(dataframe, last_max_indices,
+                                                       confirm_window_size=self.confirmation_pivot_candles,
+                                                       confirm_by_divergence=self.divergence_confirmation,
+                                                       send_repetitive_signal=self.send_repetitive_signal):
+                last_index = group_indices[-1]
+                dataframe.loc[last_index, 'valid_signal'] = -1
+
+        ############## Short Signals ##############
+
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -217,12 +255,23 @@ class CPD(IStrategy):
         dataframe.loc[dataframe['valid_signal'] == 1,
             'enter_long'] = 1
         if dataframe['enter_long'].iloc[-1] == 1:
-            metadata['strategy_name'] = self.__class__.__name__
+            metadata['strategy_name'] = f"{self.__class__.__name__} (Long)"
             metadata['timeframe'] = self.timeframe
             data = dataframe.tail(self.plot_candle_count)
 
             self.custom_notif.send_custom_message(self.dp, data, metadata,
-                                                  plot_config=self.telegram_plot_config,
+                                                  plot_config=self.telegram_plot_config_long,
+                                                  markers=None)
+
+        dataframe.loc[dataframe['valid_signal'] == -1,
+            'enter_short'] = 1
+        if dataframe['enter_short'].iloc[-1] == 1:
+            metadata['strategy_name'] = f"{self.__class__.__name__} (Short)"
+            metadata['timeframe'] = self.timeframe
+            data = dataframe.tail(self.plot_candle_count)
+
+            self.custom_notif.send_custom_message(self.dp, data, metadata,
+                                                  plot_config=self.telegram_plot_config_short,
                                                   markers=None)
 
         return dataframe

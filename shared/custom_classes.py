@@ -94,6 +94,74 @@ class CustomMethods:
 
         return is_valid
 
+    def confirm_short_pivot(self, df_data, index, confirm_window_size, send_repetitive_signal,
+                            confirm_by_divergence=True):
+        """
+        Confirm whether the given index in a dataframe qualifies as a short pivot, considering
+        candle direction, kijun_sen values, and optionally divergence.
+
+        Parameters
+        ----------
+        df_data : DataFrame
+            The historical market data, expected to contain OHLCV and Ichimoku columns.
+        index : int
+            The index in the dataframe to verify for a short pivot.
+        confirm_window_size : int
+            The number of candles after the given index to consider for confirmation.
+        send_repetitive_signal : bool
+            Determines if the same CPD signal should be sent repeatedly until it becomes invalid.
+        confirm_by_divergence : bool, optional
+            If True, the pivot confirmation will additionally consider divergence. Default is True.
+
+        Returns
+        -------
+        bool
+            True if the specified conditions for a short pivot are met, otherwise False.
+
+        Notes
+        -----
+        A short pivot is confirmed if:
+        1. All candles in the confirmation window post the specified index are bearish.
+        2. The 'kijun_sen' values within the confirmation window are consistent.
+        """
+
+        end_index = index + confirm_window_size
+
+        if not send_repetitive_signal and len(df_data) - 1 > end_index:
+            return False
+
+        if end_index > len(df_data) - 1:
+            return False
+
+        above_base_confirm_data = df_data.loc[index:]
+
+        all_lows_higher = (above_base_confirm_data['low'] > above_base_confirm_data['kijun_sen']).all()
+
+        if not all_lows_higher:
+            return False
+
+        piv_confirm_data = above_base_confirm_data.loc[:end_index]
+
+        piv_confirm_data['candle direction'] = 'Bearish'
+        piv_confirm_data.loc[piv_confirm_data['open'] < piv_confirm_data['close'], 'candle direction'] = 'Bullish'
+
+        all_bearish = (piv_confirm_data['candle direction'] == 'Bearish').all()
+
+        is_all_base_same = piv_confirm_data['kijun_sen'].nunique() == 1
+
+        bullish_divergence = True
+
+        if confirm_by_divergence:
+            price_slope = np.polyfit(range(len(piv_confirm_data)), piv_confirm_data["close"].values, 1)[0]
+            conversion_line_slope = np.polyfit(range(len(piv_confirm_data)), piv_confirm_data["tenkan_sen"].values, 1)[
+                0]
+
+            # Detect bearish divergence
+            bullish_divergence = price_slope < 0 < conversion_line_slope
+
+        is_valid = all_bearish and is_all_base_same and bullish_divergence
+
+        return is_valid
 
     def ichimoku(self, dataframe, conversion_line_period=9, base_line_periods=26,
                  laggin_span=52, displacement=26):
