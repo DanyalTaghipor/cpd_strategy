@@ -13,6 +13,7 @@ from freqtrade.strategy import (IStrategy)
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 import numpy as np
 import os
+import talib.abstract as ta
 from scipy.ndimage import label, sum
 from shared.custom_classes import CustomSender, CustomMethods
 
@@ -80,6 +81,8 @@ class CPD(IStrategy):
     laggin_span = 52
     displacement = 26
 
+    rsi_len = 14
+
     confirmation_pivot_candles = int(os.environ.get('CONFIRMATION_PIVOT_CANDLES', '1'))  # Number of Bearish/Bullish Candles After Pivot to Confirm It
 
     confirmation_candles = 4 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
@@ -94,7 +97,7 @@ class CPD(IStrategy):
     startup_candle_count: int = 70
 
     # Plot Length
-    plot_candle_count = 30
+    plot_candle_count = 35
 
     # Optional order type mapping.
     order_types = {
@@ -125,6 +128,9 @@ class CPD(IStrategy):
             'kijun_sen': {'color': 'blue'},
             'leading_senkou_span_b': {'color': 'red'},
             'minimum_lines': {'color': 'aqua'},
+        },
+        'sub_plot': {
+            'rsi': {'color': 'blue'}
         }
     }
 
@@ -134,6 +140,9 @@ class CPD(IStrategy):
             'kijun_sen': {'color': 'blue'},
             'leading_senkou_span_b': {'color': 'red'},
             'maximum_lines': {'color': 'aqua'},
+        },
+        'sub_plot': {
+            'rsi': {'color': 'blue'}
         }
     }
 
@@ -163,6 +172,8 @@ class CPD(IStrategy):
         :return: a Dataframe with all mandatory indicators for the strategies
         """
 
+        # RSI
+        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=self.rsi_len)
 
         # Ichi
         ichi_ = self.custom_methods.ichimoku(dataframe=dataframe,
@@ -259,9 +270,17 @@ class CPD(IStrategy):
             metadata['timeframe'] = self.timeframe
             data = dataframe.tail(self.plot_candle_count)
 
+            candle_markers = np.full(len(data), np.nan)
+            candle_markers[-9] = round(data.iloc[-9]['high'], 7)
+            candle_markers[-26] = round(data.iloc[-26]['high'], 7)
+
+            markers = {
+                "data": candle_markers.tolist(),
+                "color": 'darkgreen'}
+
             self.custom_notif.send_custom_message(self.dp, data, metadata,
                                                   plot_config=self.telegram_plot_config_long,
-                                                  markers=None)
+                                                  markers={"markers": markers})
 
         dataframe.loc[dataframe['valid_signal'] == -1,
             'enter_short'] = 1
@@ -270,9 +289,17 @@ class CPD(IStrategy):
             metadata['timeframe'] = self.timeframe
             data = dataframe.tail(self.plot_candle_count)
 
+            candle_markers = np.full(len(data), np.nan)
+            candle_markers[-9] = round(data.iloc[-9]['high'], 7)
+            candle_markers[-26] = round(data.iloc[-26]['high'], 7)
+
+            markers = {
+                "data": candle_markers.tolist(),
+                "color": 'darkred'}
+
             self.custom_notif.send_custom_message(self.dp, data, metadata,
                                                   plot_config=self.telegram_plot_config_short,
-                                                  markers=None)
+                                                  markers={"markers": markers})
 
         return dataframe
 
