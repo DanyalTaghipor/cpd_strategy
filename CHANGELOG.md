@@ -2,6 +2,13 @@
 
 
 
+## v2.7.0 (2023-11-08)
+
+### Feature
+
+* feat(cpd): add rsi sub plot ([`f18d463`](https://github.com/tradefreq/cpd_strategy/commit/f18d4636346eab3b1f6d6c4602477a8287fcc836))
+
+
 ## v2.6.0 (2023-11-06)
 
 ### Feature
