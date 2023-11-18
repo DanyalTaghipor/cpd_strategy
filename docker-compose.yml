@@ -10,7 +10,7 @@ x-shared-logging: &logging
     max-size: "1m"
     max-file: "1"
 
-x-shared-deploy: &default-deploy
+x-shared-deploy: &deploy
   mode: replicated
   replicas: 1
   placement:
@@ -27,7 +27,7 @@ x-service-template: &service-template
     <<: *logging
 
   deploy:
-    <<: *default-deploy
+    <<: *deploy
 
   volumes:
     - "./user_data:/freqtrade/user_data"
