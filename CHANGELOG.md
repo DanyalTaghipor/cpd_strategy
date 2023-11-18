@@ -2,6 +2,13 @@
 
 
 
+## v2.7.1 (2023-11-18)
+
+### Fix
+
+* fix(docker-compose): remove worker anchors from docker-compose ([`15f7903`](https://github.com/tradefreq/cpd_strategy/commit/15f79031102286524633b4019627d412c282f4bd))
+
+
 ## v2.7.0 (2023-11-08)
 
 ### Feature
