@@ -10,7 +10,7 @@ x-shared-logging: &logging
     max-size: "1m"
     max-file: "1"
 
-x-shared-deploy: &deploy
+x-shared-deploy-master: &master-deploy
   mode: replicated
   replicas: 1
   placement:
@@ -20,14 +20,43 @@ x-shared-deploy: &deploy
     condition: on-failure
     delay: 5s
 
-x-service-template: &service-template
+x-service-template-master: &service-template-master
   image: freqtradeorg/freqtrade:develop_plot
 
   logging:
     <<: *logging
 
   deploy:
-    <<: *deploy
+    <<: *master-deploy
+
+  volumes:
+    - "./user_data:/freqtrade/user_data"
+    - "./shared:/freqtrade/shared"
+
+  labels:
+    - "traefik.http.services.freqcpd.loadbalancer.sticky.cookie.name=cpdfreq"
+  networks:
+    - freq_net
+
+
+x-shared-deploy-worker: &worker-deploy
+  mode: replicated
+  replicas: 1
+  placement:
+    constraints:
+      - node.labels.node_type == worker-1
+  restart_policy:
+    condition: on-failure
+    delay: 5s
+
+x-service-template-worker: &service-template-worker
+  image: freqtradeorg/freqtrade:develop_plot
+
+  logging:
+    <<: *logging
+
+  deploy:
+    <<: *worker-deploy
 
   volumes:
     - "./user_data:/freqtrade/user_data"
@@ -40,12 +69,12 @@ x-service-template: &service-template
 
 services:
   cpd_1w:
-    <<: *service-template
+    <<: *service-template-master
 
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=1w
-      - CONFIRMATION_PIVOT_CANDLES=2
+      - CONFIRMATION_PIVOT_CANDLES=1
 
     command: >
       trade
@@ -59,12 +88,12 @@ services:
       - "traefik.http.services.cpd1w.loadbalancer.server.port=8080"
 
   cpd_1d:
-    <<: *service-template
+    <<: *service-template-master
 
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=1d
-      - CONFIRMATION_PIVOT_CANDLES=2
+      - CONFIRMATION_PIVOT_CANDLES=1
 
     command: >
       trade
@@ -78,12 +107,12 @@ services:
       - "traefik.http.services.cpd1d.loadbalancer.server.port=8080"
 
   cpd_4h:
-    <<: *service-template
+    <<: *service-template-master
 
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=4h
-      - CONFIRMATION_PIVOT_CANDLES=2
+      - CONFIRMATION_PIVOT_CANDLES=1
 
     command: >
       trade
@@ -97,7 +126,7 @@ services:
       - "traefik.http.services.cpd4h.loadbalancer.server.port=8080"
 
   cpd_1h:
-    <<: *service-template
+    <<: *service-template-master
 
     environment:
       - PYTHONPATH=/freqtrade
@@ -116,7 +145,7 @@ services:
       - "traefik.http.services.cpd1h.loadbalancer.server.port=8080"
 
   cpd_15m:
-    <<: *service-template
+    <<: *service-template-worker
 
     environment:
       - PYTHONPATH=/freqtrade
