@@ -31,144 +31,96 @@ class CustomSender:
 
 class CustomMethods:
 
-    def confirm_long_pivot(self, df_data, index, confirm_window_size, send_repetitive_signal,
-                           confirm_by_divergence=True):
+    def find_pivot_lows(self, df,
+                        lowest_pivot_range,
+                        confirmation_pivot_candles,
+                        confirmation_pivot_candles_type,
+                        diff_between_maximum_and_twenty_six_point,
+                        close_above_conversion,
+                        divergence_confirmation,
+                        entry_price_type,
+                        entry_base_distance,
+                        tp_base_check_point_type):
         """
-        Confirm whether the given index in a dataframe qualifies as a long pivot, considering
-        candle direction, kijun_sen values, and optionally divergence.
-
-        Parameters
-        ----------
-        df_data : DataFrame
-            The historical market data, expected to contain OHLCV and Ichimoku columns.
-        index : int
-            The index in the dataframe to verify for a long pivot.
-        confirm_window_size : int
-            The number of candles after the given index to consider for confirmation.
-        send_repetitive_signal : bool
-            Determines if the same CPD signal should be sent repeatedly until it becomes invalid.
-        confirm_by_divergence : bool, optional
-            If True, the pivot confirmation will additionally consider divergence. Default is True.
-
-        Returns
-        -------
-        bool
-            True if the specified conditions for a long pivot are met, otherwise False.
-
-        Notes
-        -----
-        A long pivot is confirmed if:
-        1. All candles in the confirmation window post the specified index are bullish.
-        2. The 'kijun_sen' values within the confirmation window are consistent.
+        Find pivot lows in a DataFrame with OHLC data and determine the entry signal.
         """
+        # Calculate pivot lows
+        pivot_lows = (df['low'] < df['low'].shift(1)) & (df['low'] < df['low'].shift(-1))
+        df['pivot_lows'] = np.where(pivot_lows, df['low'], np.nan)
 
-        end_index = index + confirm_window_size
+        # Filter pivot lows based on lowest_pivot_range
+        if lowest_pivot_range > 0:
+            rolling_min = df['low'].rolling(window=lowest_pivot_range, min_periods=1).min()
+            df['pivot_lows'] = np.where(df['pivot_lows'] == rolling_min, df['pivot_lows'], np.nan)
 
-        if not send_repetitive_signal and len(df_data) - 1 > end_index:
-            return False
+        df['long_signal'] = np.nan
 
-        if end_index > len(df_data) - 1:
-            return False
+        look_ahead_num = confirmation_pivot_candles if confirmation_pivot_candles > 0 else 1
 
-        below_base_confirm_data = df_data.loc[index:]
+        # Filter based on additional conditions
+        for i in df[df['pivot_lows'].notna()].index:
+            entry_price = df[str.lower(entry_price_type)].iloc[i + look_ahead_num]
 
-        all_highs_lower = (below_base_confirm_data['high'] < below_base_confirm_data['kijun_sen']).all()
+            # Confirmation check
+            if confirmation_pivot_candles > 0 and i + confirmation_pivot_candles < len(df):
+                confirmation_cond = self._check_confirmation(df=df, pivot_index=i,
+                                                             signal_index=i + confirmation_pivot_candles,
+                                                             confirmation_pivot_candles_type=confirmation_pivot_candles_type)
+                if not confirmation_cond:
+                    continue
 
-        if not all_highs_lower:
-            return False
+            # Check diff_between_maximum_and_twenty_six_point
+            if diff_between_maximum_and_twenty_six_point > 0 and not self._check_maximum_diff(df=df,
+                                                                                              signal_index=i + look_ahead_num,
+                                                                                              diff_value=diff_between_maximum_and_twenty_six_point):
+                continue
 
-        piv_confirm_data = below_base_confirm_data.loc[:end_index]
+            # Check close_above_conversion
+            if close_above_conversion and not self._check_close_above_conversion(df=df,
+                                                                                 pivot_index=i,
+                                                                                 signal_index=i + look_ahead_num):
+                continue
 
-        piv_confirm_data['candle direction'] = 'Bullish'
-        piv_confirm_data.loc[piv_confirm_data['open'] > piv_confirm_data['close'], 'candle direction'] = 'Bearish'
+            # Check divergence
+            if divergence_confirmation and not self._divergence_confirmation(df=df, pivot_index=i):
+                continue
 
-        all_bullish = (piv_confirm_data['candle direction'] == 'Bullish').all()
+            # Check entry base distance
+            if entry_base_distance > 0 and not self._check_entry_base_distance(df=df,
+                                                                               pivot_index=i,
+                                                                               signal_index=i + look_ahead_num,
+                                                                               entry_base_distance=entry_base_distance,
+                                                                               entry_price=entry_price,
+                                                                               tp_base_check_point_type=tp_base_check_point_type):
+                continue
 
-        is_all_base_same = piv_confirm_data['kijun_sen'].nunique() == 1
+            df.at[i + look_ahead_num, 'long_signal'] = entry_price
 
-        bearish_divergence = True
+        return df
 
-        if confirm_by_divergence:
-            price_slope = np.polyfit(range(len(piv_confirm_data)), piv_confirm_data["close"].values, 1)[0]
-            conversion_line_slope = np.polyfit(range(len(piv_confirm_data)), piv_confirm_data["tenkan_sen"].values, 1)[0]
+    def _check_confirmation(self, df, pivot_index, signal_index, confirmation_pivot_candles_type):
+        confirmation_candles = df.iloc[pivot_index + 1:signal_index + 1]
+        if confirmation_pivot_candles_type == 'bullish':
+            return all(confirmation_candles['close'] > confirmation_candles['open'])
+        else:
+            return all(confirmation_candles['close'] > df.at[pivot_index, 'close'])
 
-            # # Detect bullish divergence
-            # bullish_divergence = price_slope < 0 and conversion_line_slope > 0
+    def _check_maximum_diff(self, df, signal_index, diff_value):
+        start_index = max(0, signal_index - 26)
+        highest_index = df['high'][start_index:signal_index + 1].idxmax()
+        return signal_index - highest_index >= diff_value
 
-            bearish_divergence = price_slope > 0 > conversion_line_slope
+    def _check_close_above_conversion(self, df, pivot_index, signal_index):
+        return df['close'].iloc[signal_index] > df['tenkan_sen'].iloc[pivot_index]
 
-        is_valid = all_bullish and is_all_base_same and bearish_divergence
+    def _divergence_confirmation(self, df, pivot_index):
+        next_index = pivot_index + 1
+        return df['tenkan_sen'].iloc[next_index] < df['tenkan_sen'].iloc[pivot_index]
 
-        return is_valid
-
-    def confirm_short_pivot(self, df_data, index, confirm_window_size, send_repetitive_signal,
-                            confirm_by_divergence=True):
-        """
-        Confirm whether the given index in a dataframe qualifies as a short pivot, considering
-        candle direction, kijun_sen values, and optionally divergence.
-
-        Parameters
-        ----------
-        df_data : DataFrame
-            The historical market data, expected to contain OHLCV and Ichimoku columns.
-        index : int
-            The index in the dataframe to verify for a short pivot.
-        confirm_window_size : int
-            The number of candles after the given index to consider for confirmation.
-        send_repetitive_signal : bool
-            Determines if the same CPD signal should be sent repeatedly until it becomes invalid.
-        confirm_by_divergence : bool, optional
-            If True, the pivot confirmation will additionally consider divergence. Default is True.
-
-        Returns
-        -------
-        bool
-            True if the specified conditions for a short pivot are met, otherwise False.
-
-        Notes
-        -----
-        A short pivot is confirmed if:
-        1. All candles in the confirmation window post the specified index are bearish.
-        2. The 'kijun_sen' values within the confirmation window are consistent.
-        """
-
-        end_index = index + confirm_window_size
-
-        if not send_repetitive_signal and len(df_data) - 1 > end_index:
-            return False
-
-        if end_index > len(df_data) - 1:
-            return False
-
-        above_base_confirm_data = df_data.loc[index:]
-
-        all_lows_higher = (above_base_confirm_data['low'] > above_base_confirm_data['kijun_sen']).all()
-
-        if not all_lows_higher:
-            return False
-
-        piv_confirm_data = above_base_confirm_data.loc[:end_index]
-
-        piv_confirm_data['candle direction'] = 'Bearish'
-        piv_confirm_data.loc[piv_confirm_data['open'] < piv_confirm_data['close'], 'candle direction'] = 'Bullish'
-
-        all_bearish = (piv_confirm_data['candle direction'] == 'Bearish').all()
-
-        is_all_base_same = piv_confirm_data['kijun_sen'].nunique() == 1
-
-        bullish_divergence = True
-
-        if confirm_by_divergence:
-            price_slope = np.polyfit(range(len(piv_confirm_data)), piv_confirm_data["close"].values, 1)[0]
-            conversion_line_slope = np.polyfit(range(len(piv_confirm_data)), piv_confirm_data["tenkan_sen"].values, 1)[
-                0]
-
-            # Detect bearish divergence
-            bullish_divergence = price_slope < 0 < conversion_line_slope
-
-        is_valid = all_bearish and is_all_base_same and bullish_divergence
-
-        return is_valid
+    def _check_entry_base_distance(self, df, pivot_index, signal_index, entry_base_distance, entry_price, tp_base_check_point_type):
+        baseline_value = df['kijun_sen'].iloc[pivot_index if tp_base_check_point_type == 'minimum' else signal_index]
+        percent_diff = ((baseline_value - entry_price) / entry_price) * 100
+        return abs(percent_diff) >= entry_base_distance
 
     def ichimoku(self, dataframe, conversion_line_period=9, base_line_periods=26,
                  laggin_span=52, displacement=26):
