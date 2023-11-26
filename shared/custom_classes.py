@@ -18,11 +18,12 @@ class CustomSender:
                     'data': dataframe[key].tolist(),
                     'color': attributes['color']
                 }
-            for key, attributes in plot_config['sub_plot'].items():
-                sub_plot_data[key] = {
-                    'data': dataframe[key].tolist(),
-                    'color': attributes['color']
-                }
+            if 'sub_plot' in plot_config:
+                for key, attributes in plot_config['sub_plot'].items():
+                    sub_plot_data[key] = {
+                        'data': dataframe[key].tolist(),
+                        'color': attributes['color']
+                    }
         msg['main_plot_data'] = main_plot_data
         msg['sub_plot_data'] = sub_plot_data
         msg['metadata'] = metadata
