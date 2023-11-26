@@ -2,6 +2,13 @@
 
 
 
+## v3.0.1 (2023-11-26)
+
+### Fix
+
+* fix(custom_classes): make sub_plot in plot_config optional ([`77fee8b`](https://github.com/tradefreq/cpd_strategy/commit/77fee8ba2d8c7baf93617a16b8d0a8ff599344f6))
+
+
 ## v3.0.0 (2023-11-26)
 
 ### Breaking
