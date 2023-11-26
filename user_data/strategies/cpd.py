@@ -238,7 +238,7 @@ class CPD(IStrategy):
         """
         dataframe.loc[dataframe['long_signal'] != np.nan,
             'enter_long'] = 1
-        if dataframe['enter_long'].iloc[-1] == 1:
+        if dataframe['long_signal'].iloc[-1] > 0:
             metadata['strategy_name'] = f"{self.__class__.__name__} (Long)"
             metadata['timeframe'] = self.timeframe
             data = dataframe.tail(self.plot_candle_count)
