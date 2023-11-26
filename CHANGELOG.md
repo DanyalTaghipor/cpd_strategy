@@ -2,6 +2,21 @@
 
 
 
+## v3.0.0 (2023-11-26)
+
+### Breaking
+
+* feat(new_version_methods): cpd new version methods!
+
+BREAKING CHANGE: new version of CPD! ([`db15f7b`](https://github.com/tradefreq/cpd_strategy/commit/db15f7b7ae8bdaab5d1c6cc229dcdd41648eaa75))
+
+### Feature
+
+* feat(docker-compose): update docker-compose to handle sevices in more manual manner ([`b113803`](https://github.com/tradefreq/cpd_strategy/commit/b1138034dd11b6c0388164fd51d8eabcb6353b96))
+
+* feat(cpd): update strategy file to work with new version ([`12ae34e`](https://github.com/tradefreq/cpd_strategy/commit/12ae34ea5a0849a68b04787663e83da306045f3a))
+
+
 ## v2.7.1 (2023-11-18)
 
 ### Fix
