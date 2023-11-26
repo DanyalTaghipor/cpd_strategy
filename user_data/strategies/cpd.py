@@ -5,7 +5,7 @@
 import numpy as np  # noqa
 import pandas as pd  # noqa
 from pandas import DataFrame
-
+from freqtrade.persistence import Trade
 from freqtrade.strategy import (IStrategy)
 
 # --------------------------------
@@ -16,7 +16,7 @@ import os
 import talib.abstract as ta
 from scipy.ndimage import label, sum
 from shared.custom_classes import CustomSender, CustomMethods
-
+from typing import Optional
 
 # This class is a sample. Feel free to customize it.
 class CPD(IStrategy):
@@ -45,7 +45,7 @@ class CPD(IStrategy):
     INTERFACE_VERSION = 3
 
     # Can this strategy go short?
-    can_short: bool = True
+    can_short: bool = False
 
     # Minimal ROI designed for the strategy.
     # This attribute will be overridden if the config file contains "minimal_roi".
@@ -83,15 +83,44 @@ class CPD(IStrategy):
 
     rsi_len = 14
 
-    confirmation_pivot_candles = int(os.environ.get('CONFIRMATION_PIVOT_CANDLES', '1'))  # Number of Bearish/Bullish Candles After Pivot to Confirm It
+    # Custom take profit percent
+    custom_tp = 0.3
 
-    confirmation_candles = 4 # Number of Candles Below Span B To Confirm A Valid Range (Zero And One Means No Confirmation)
-    close_confirmation_range = True # If True, Close of Candle Should Break Range
-    divergence_confirmation = False # If True, CPD needs divergence confirmation too
+    # Custom stop loss percent
+    custom_sl = 0.3
 
-    # Determines whether to continuously send the CPD signal regardless of its freshness.
-    # If set to True, the same CPD signal will be sent multiple times until it becomes invalid.
-    send_repetitive_signal = False
+    # Check if the pivot candle has the lowest value compared to, for example, the 10 previous lows.
+    lowest_pivot_range = 10
+
+    # Number of Bearish/Bullish Candles After Pivot to Confirm It
+    confirmation_pivot_candles = int(os.environ.get('CONFIRMATION_PIVOT_CANDLES', '1'))
+
+    # Here are two options:
+    # 'bullish' and 'greater_than_minimum' (gt_min).
+    # If the option is 'bullish', the candles based on confirmation_pivot_candles should be bullish;
+    # otherwise, their close should be greater than the close of the pivot candle.
+    confirmation_pivot_candles_type = "bullish"
+
+    # Check if the difference between the highest pivot and the pivot signal index,
+    # going back 26 candles, is less than a specific number.
+    diff_between_maximum_and_twenty_six_point = 8
+
+    # If True, The Close of Last Candle In Pivot Pattern Should Be Greater Than Conversion
+    close_above_conversion = True
+
+    # If True, CPD needs divergence confirmation too
+    divergence_confirmation = True
+
+    # possible values are close and high
+    entry_price_type = 'close'
+
+    # Check if the distance, in percent, between the base and the entry price is greater than a specific value.
+    entry_base_distance = 0.5
+
+    # Determine the Starting Point for Measuring the Distance
+    # to Take Profit (TP) and Base (Either at the Minimum or the Entry Candle).
+    # Possible values are minimum and entry_candle
+    tp_base_check_point_type = 'minimum'
 
     # Number of candles the strategy requires before producing valid signals
     startup_candle_count: int = 70
@@ -127,10 +156,7 @@ class CPD(IStrategy):
             'tenkan_sen': {'color': 'orange'},
             'kijun_sen': {'color': 'blue'},
             'leading_senkou_span_b': {'color': 'red'},
-            'minimum_lines': {'color': 'aqua'},
-        },
-        'sub_plot': {
-            'rsi': {'color': 'blue'}
+            'pivot_lows': {'color': 'pink'},
         }
     }
 
@@ -172,9 +198,6 @@ class CPD(IStrategy):
         :return: a Dataframe with all mandatory indicators for the strategies
         """
 
-        # RSI
-        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=self.rsi_len)
-
         # Ichi
         ichi_ = self.custom_methods.ichimoku(dataframe=dataframe,
                               conversion_line_period=self.conversion_line_period,
@@ -193,67 +216,17 @@ class CPD(IStrategy):
         dataframe['cloud_green'] = ichi_['cloud_green']
         dataframe['cloud_red'] = ichi_['cloud_red']
 
-        # Valid Signals
-        dataframe['valid_signal'] = np.nan
-
         ############## Long Signals ##############
-        break_range_src_long = dataframe['close'] if self.close_confirmation_range else dataframe['high']
-
-        # Valid Ranges
-        dataframe['long_ranges'] = np.where(break_range_src_long < dataframe['leading_senkou_span_b'], 1, np.nan)
-        labels_long, num_features_long = label(dataframe['long_ranges'] == 1)
-        counts_long = sum(dataframe['long_ranges'] == 1, labels_long, range(num_features_long + 1))
-        dataframe.loc[counts_long[labels_long] < self.confirmation_candles, 'long_ranges'] = np.nan
-
-        # Minimum Lines
-        dataframe.loc[dataframe['long_ranges'] == 1, 'minimum_lines'] = dataframe.groupby(labels_long)['low'].transform('min')
-        last_min_indices = dataframe.groupby(labels_long)['low'].idxmin().values[-1]
-
-        dataframe['long_target_price_entry'] = np.nan
-
-        group_label = labels_long[last_min_indices]
-
-        group_indices = dataframe[(labels_long == group_label) & (dataframe['long_ranges'] == 1)].index
-        if len(group_indices) > 0:
-            if self.custom_methods.confirm_long_pivot(dataframe, last_min_indices,
-                                                      confirm_window_size=self.confirmation_pivot_candles,
-                                                      confirm_by_divergence=self.divergence_confirmation,
-                                                      send_repetitive_signal=self.send_repetitive_signal):
-
-                last_index = group_indices[-1]
-                dataframe.loc[last_index, 'valid_signal'] = 1
-
-        ############## Long Signals ##############
-
-        ############## Short Signals ##############
-        break_range_src_short = dataframe['close'] if self.close_confirmation_range else dataframe['low']
-
-        # Valid Ranges
-        dataframe['short_ranges'] = np.where(break_range_src_short > dataframe['leading_senkou_span_b'], 1, np.nan)
-        labels_short, num_features_short = label(dataframe['short_ranges'] == 1)
-        counts_short = sum(dataframe['short_ranges'] == 1, labels_short, range(num_features_short + 1))
-        dataframe.loc[counts_short[labels_short] < self.confirmation_candles, 'short_ranges'] = np.nan
-
-        # Maximum Lines
-        dataframe.loc[dataframe['short_ranges'] == 1, 'maximum_lines'] = dataframe.groupby(labels_short)[
-            'high'].transform('max')
-        last_max_indices = dataframe.groupby(labels_short)['high'].idxmax().values[-1]
-
-        dataframe['short_target_price_entry'] = np.nan
-
-        group_label = labels_short[last_max_indices]
-
-        group_indices = dataframe[(labels_short == group_label) & (dataframe['short_ranges'] == 1)].index
-        if len(group_indices) > 0:
-            if self.custom_methods.confirm_short_pivot(dataframe, last_max_indices,
-                                                       confirm_window_size=self.confirmation_pivot_candles,
-                                                       confirm_by_divergence=self.divergence_confirmation,
-                                                       send_repetitive_signal=self.send_repetitive_signal):
-                last_index = group_indices[-1]
-                dataframe.loc[last_index, 'valid_signal'] = -1
-
-        ############## Short Signals ##############
-
+        dataframe=self.custom_methods.find_pivot_lows(df=dataframe,
+                                                      lowest_pivot_range=self.lowest_pivot_range,
+                                                      confirmation_pivot_candles=self.confirmation_pivot_candles,
+                                                      confirmation_pivot_candles_type=self.confirmation_pivot_candles_type,
+                                                      diff_between_maximum_and_twenty_six_point=self.diff_between_maximum_and_twenty_six_point,
+                                                      close_above_conversion=self.close_above_conversion,
+                                                      divergence_confirmation=self.divergence_confirmation,
+                                                      entry_price_type=self.entry_price_type,
+                                                      entry_base_distance=self.entry_base_distance,
+                                                      tp_base_check_point_type=self.tp_base_check_point_type)
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -263,7 +236,7 @@ class CPD(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with entry columns populated
         """
-        dataframe.loc[dataframe['valid_signal'] == 1,
+        dataframe.loc[dataframe['long_signal'] != np.nan,
             'enter_long'] = 1
         if dataframe['enter_long'].iloc[-1] == 1:
             metadata['strategy_name'] = f"{self.__class__.__name__} (Long)"
@@ -280,25 +253,6 @@ class CPD(IStrategy):
 
             self.custom_notif.send_custom_message(self.dp, data, metadata,
                                                   plot_config=self.telegram_plot_config_long,
-                                                  markers={"markers": markers})
-
-        dataframe.loc[dataframe['valid_signal'] == -1,
-            'enter_short'] = 1
-        if dataframe['enter_short'].iloc[-1] == 1:
-            metadata['strategy_name'] = f"{self.__class__.__name__} (Short)"
-            metadata['timeframe'] = self.timeframe
-            data = dataframe.tail(self.plot_candle_count)
-
-            candle_markers = np.full(len(data), np.nan)
-            candle_markers[-9] = round(data.iloc[-9]['high'], 7)
-            candle_markers[-26] = round(data.iloc[-26]['high'], 7)
-
-            markers = {
-                "data": candle_markers.tolist(),
-                "color": 'darkred'}
-
-            self.custom_notif.send_custom_message(self.dp, data, metadata,
-                                                  plot_config=self.telegram_plot_config_short,
                                                   markers={"markers": markers})
 
         return dataframe
