@@ -2,6 +2,13 @@
 
 
 
+## v3.0.2 (2023-11-26)
+
+### Fix
+
+* fix(cpd): fix signaling condition ([`5c6caa9`](https://github.com/tradefreq/cpd_strategy/commit/5c6caa99f813a821f84cb00b713e8b39e425c134))
+
+
 ## v3.0.1 (2023-11-26)
 
 ### Fix
