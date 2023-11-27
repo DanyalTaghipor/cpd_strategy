@@ -197,7 +197,7 @@
     },
     "webhook": {
     "enabled": true,
-    "url": "http://plotter_test:8000/plotter/send_plot_to_telegram/",
+    "url": "http://plotter_main:8000/plotter/send_plot_to_telegram/",
     "retries": 0,
     "retry_delay": 10,
     "allow_custom_messages": true,
