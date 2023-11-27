@@ -51,8 +51,8 @@ class CustomMethods:
 
         # Filter pivot lows based on lowest_pivot_range
         if lowest_pivot_range > 0:
-            rolling_min = df['low'].rolling(window=lowest_pivot_range, min_periods=1).min()
-            df['pivot_lows'] = np.where(df['pivot_lows'] == rolling_min, df['pivot_lows'], np.nan)
+            rolling_min = df['low'].shift(1).rolling(window=lowest_pivot_range, min_periods=1).min()
+            df['pivot_lows'] = np.where(df['pivot_lows'] <= rolling_min, df['pivot_lows'], np.nan)
 
         df['long_signal'] = np.nan
 
@@ -121,7 +121,7 @@ class CustomMethods:
     def _check_entry_base_distance(self, df, pivot_index, signal_index, entry_base_distance, entry_price, tp_base_check_point_type):
         baseline_value = df['kijun_sen'].iloc[pivot_index if tp_base_check_point_type == 'minimum' else signal_index]
         percent_diff = ((baseline_value - entry_price) / entry_price) * 100
-        return abs(percent_diff) >= entry_base_distance
+        return percent_diff >= entry_base_distance
 
     def ichimoku(self, dataframe, conversion_line_period=9, base_line_periods=26,
                  laggin_span=52, displacement=26):
