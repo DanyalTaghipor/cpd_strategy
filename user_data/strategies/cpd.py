@@ -101,7 +101,7 @@ class CPD(IStrategy):
 
     # Check if the difference between the highest pivot and the pivot signal index,
     # going back 26 candles, is less than a specific number.
-    diff_between_maximum_and_twenty_six_point = 3
+    diff_between_maximum_and_twenty_six_point = 5
 
     # If True, The Close of Last Candle In Pivot Pattern Should Be Greater Than Conversion
     close_above_conversion = True
