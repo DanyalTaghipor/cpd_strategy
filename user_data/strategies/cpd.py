@@ -234,6 +234,8 @@ class CPD(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with entry columns populated
         """
+        dataframe.loc[dataframe['long_signal'] != np.nan,
+            'enter_long'] = 1
         if dataframe['long_signal'].iloc[-1] > 0:
             metadata['strategy_name'] = f"{self.__class__.__name__} (Long)"
             metadata['timeframe'] = self.timeframe
