@@ -109,7 +109,7 @@ class CustomMethods:
     def _check_maximum_diff(self, df, signal_index, diff_value):
         start_index = max(0, signal_index - 26)
         highest_index = df['high'][start_index:signal_index + 1].idxmax()
-        return signal_index - highest_index >= diff_value
+        return abs(start_index - highest_index) >= diff_value
 
     def _check_close_above_conversion(self, df, pivot_index, signal_index):
         return df['close'].iloc[signal_index] > df['tenkan_sen'].iloc[pivot_index]
