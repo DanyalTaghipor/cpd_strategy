@@ -2,6 +2,19 @@
 
 
 
+## v3.0.5 (2023-11-27)
+
+### Fix
+
+* fix(custom_classes): fix lowest_pivot_range and _check_entry_base_distance bug ([`9922535`](https://github.com/tradefreq/cpd_strategy/commit/992253507005a82708be3a993fa42a85e1a283bf))
+
+### Refactor
+
+* refactor(cpd): modify diff_between_maximum_and_twenty_six_point param ([`b8ad037`](https://github.com/tradefreq/cpd_strategy/commit/b8ad037b375f061c71739b4563a11365a686f016))
+
+* refactor(config.json): change plotter service from test to main ([`375957c`](https://github.com/tradefreq/cpd_strategy/commit/375957c9bcdcf353e724f1785fee39598f832a1d))
+
+
 ## v3.0.4 (2023-11-27)
 
 ### Fix
