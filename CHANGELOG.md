@@ -2,6 +2,17 @@
 
 
 
+## v3.0.4 (2023-11-27)
+
+### Fix
+
+* fix(cpd): fix enter_long condition ([`d4bfc63`](https://github.com/tradefreq/cpd_strategy/commit/d4bfc63db60341d47f90089d76c132050ce38188))
+
+### Refactor
+
+* refactor(cpd): modify params to get signals sooner ([`15d3264`](https://github.com/tradefreq/cpd_strategy/commit/15d3264475249096cfe8f6861f6fa31cab0d7a35))
+
+
 ## v3.0.3 (2023-11-27)
 
 ### Fix
