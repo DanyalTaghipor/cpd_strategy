@@ -2,6 +2,13 @@
 
 
 
+## v3.0.3 (2023-11-27)
+
+### Fix
+
+* fix(custom_classes): fix _check_maximum_diff method bug ([`0df23da`](https://github.com/tradefreq/cpd_strategy/commit/0df23da0edba8350e5b2d906fb94d96ec9e0be7c))
+
+
 ## v3.0.2 (2023-11-26)
 
 ### Fix
