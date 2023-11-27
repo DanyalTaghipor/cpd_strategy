@@ -81,8 +81,6 @@ class CPD(IStrategy):
     laggin_span = 52
     displacement = 26
 
-    rsi_len = 14
-
     # Custom take profit percent
     custom_tp = 0.3
 
@@ -90,7 +88,7 @@ class CPD(IStrategy):
     custom_sl = 0.3
 
     # Check if the pivot candle has the lowest value compared to, for example, the 10 previous lows.
-    lowest_pivot_range = 10
+    lowest_pivot_range = 3
 
     # Number of Bearish/Bullish Candles After Pivot to Confirm It
     confirmation_pivot_candles = int(os.environ.get('CONFIRMATION_PIVOT_CANDLES', '1'))
@@ -103,7 +101,7 @@ class CPD(IStrategy):
 
     # Check if the difference between the highest pivot and the pivot signal index,
     # going back 26 candles, is less than a specific number.
-    diff_between_maximum_and_twenty_six_point = 8
+    diff_between_maximum_and_twenty_six_point = 3
 
     # If True, The Close of Last Candle In Pivot Pattern Should Be Greater Than Conversion
     close_above_conversion = True
@@ -236,8 +234,6 @@ class CPD(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with entry columns populated
         """
-        dataframe.loc[dataframe['long_signal'] != np.nan,
-            'enter_long'] = 1
         if dataframe['long_signal'].iloc[-1] > 0:
             metadata['strategy_name'] = f"{self.__class__.__name__} (Long)"
             metadata['timeframe'] = self.timeframe
