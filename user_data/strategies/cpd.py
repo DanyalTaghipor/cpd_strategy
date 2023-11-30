@@ -88,7 +88,7 @@ class CPD(IStrategy):
     custom_sl = 0.3
 
     # Check if the pivot candle has the lowest value compared to, for example, the 10 previous lows.
-    lowest_pivot_range = 6
+    lowest_pivot_range = 7
 
     # Number of Bearish/Bullish Candles After Pivot to Confirm It
     confirmation_pivot_candles = int(os.environ.get('CONFIRMATION_PIVOT_CANDLES', '1'))
