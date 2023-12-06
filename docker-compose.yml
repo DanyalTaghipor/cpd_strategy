@@ -74,7 +74,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=1w
-      - CONFIRMATION_PIVOT_CANDLES=1
+      - CONFIRMATION_PIVOT_CANDLES=2
 
     command: >
       trade
@@ -93,7 +93,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=1d
-      - CONFIRMATION_PIVOT_CANDLES=1
+      - CONFIRMATION_PIVOT_CANDLES=2
 
     command: >
       trade
@@ -112,7 +112,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=4h
-      - CONFIRMATION_PIVOT_CANDLES=1
+      - CONFIRMATION_PIVOT_CANDLES=2
 
     command: >
       trade
@@ -131,7 +131,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=1h
-      - CONFIRMATION_PIVOT_CANDLES=1
+      - CONFIRMATION_PIVOT_CANDLES=2
 
     command: >
       trade
@@ -150,7 +150,7 @@ services:
     environment:
       - PYTHONPATH=/freqtrade
       - TIMEFRAME=15m
-      - CONFIRMATION_PIVOT_CANDLES=1
+      - CONFIRMATION_PIVOT_CANDLES=2
 
     command: >
       trade
