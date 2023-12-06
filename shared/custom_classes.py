@@ -39,6 +39,7 @@ class CustomMethods:
                         diff_between_maximum_and_twenty_six_point,
                         close_above_conversion,
                         divergence_confirmation,
+                        divergence_percent_diff,
                         entry_price_type,
                         entry_base_distance,
                         tp_base_check_point_type):
@@ -83,7 +84,9 @@ class CustomMethods:
                 continue
 
             # Check divergence
-            if divergence_confirmation and not self._divergence_confirmation(df=df, pivot_index=i):
+            if divergence_confirmation and not self._divergence_confirmation(df=df,
+                                                                             pivot_index=i,
+                                                                             percent_diff=divergence_percent_diff):
                 continue
 
             # Check entry base distance
@@ -114,9 +117,18 @@ class CustomMethods:
     def _check_close_above_conversion(self, df, pivot_index, signal_index):
         return df['close'].iloc[signal_index] > df['tenkan_sen'].iloc[pivot_index]
 
-    def _divergence_confirmation(self, df, pivot_index):
+    def _divergence_confirmation(self, df, pivot_index, percent_diff):
         next_index = pivot_index + 1
-        return df['tenkan_sen'].iloc[next_index] < df['tenkan_sen'].iloc[pivot_index]
+
+        tenkan_sen_current = df['tenkan_sen'].iloc[pivot_index]
+        tenkan_sen_next = df['tenkan_sen'].iloc[next_index]
+
+        if tenkan_sen_next >= tenkan_sen_current:
+            return False
+
+        percent_change = abs(((tenkan_sen_next - tenkan_sen_current) / tenkan_sen_current) * 100)
+
+        return percent_change >= percent_diff
 
     def _check_entry_base_distance(self, df, pivot_index, signal_index, entry_base_distance, entry_price, tp_base_check_point_type):
         baseline_value = df['kijun_sen'].iloc[pivot_index if tp_base_check_point_type == 'minimum' else signal_index]

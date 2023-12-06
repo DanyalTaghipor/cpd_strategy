@@ -109,6 +109,10 @@ class CPD(IStrategy):
     # If True, CPD needs divergence confirmation too
     divergence_confirmation = True
 
+    # The difference in (percent) between C0 and C1.
+    # For example if it is set to 0.004%, it means that the C1 should be at least 0.005% lower than the C0.
+    divergence_percent_diff = 0.04
+
     # possible values are close and high
     entry_price_type = 'close'
 
@@ -222,6 +226,7 @@ class CPD(IStrategy):
                                                       diff_between_maximum_and_twenty_six_point=self.diff_between_maximum_and_twenty_six_point,
                                                       close_above_conversion=self.close_above_conversion,
                                                       divergence_confirmation=self.divergence_confirmation,
+                                                      divergence_percent_diff=self.divergence_percent_diff,
                                                       entry_price_type=self.entry_price_type,
                                                       entry_base_distance=self.entry_base_distance,
                                                       tp_base_check_point_type=self.tp_base_check_point_type)
