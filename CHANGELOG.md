@@ -2,6 +2,13 @@
 
 
 
+## v3.1.1 (2023-12-06)
+
+### Fix
+
+* fix(docker-compose): modify CONFIRMATION_PIVOT_CANDLES env parameter ([`6b954ab`](https://github.com/tradefreq/cpd_strategy/commit/6b954abe0eab5a62db434678410484d1a649ae0b))
+
+
 ## v3.1.0 (2023-12-06)
 
 ### Feature
