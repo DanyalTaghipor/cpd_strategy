@@ -2,6 +2,19 @@
 
 
 
+## v3.1.0 (2023-12-06)
+
+### Feature
+
+* feat(CPD): add divergence_percent_diff ([`ca6ef77`](https://github.com/tradefreq/cpd_strategy/commit/ca6ef7753eb2b874a60a4f16eb460093fc2d6f11))
+
+### Refactor
+
+* refactor(cpd): modify lowest_pivot_range param ([`ff3f7b3`](https://github.com/tradefreq/cpd_strategy/commit/ff3f7b3dc6a3f1da6eebeb8f096cf07868ff4cdf))
+
+* refactor(cpd): modify lowest_pivot_range param ([`66e57a4`](https://github.com/tradefreq/cpd_strategy/commit/66e57a44f70c1c506a0ce8ae4864a339273def65))
+
+
 ## v3.0.5 (2023-11-27)
 
 ### Fix
