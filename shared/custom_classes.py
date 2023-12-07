@@ -37,7 +37,7 @@ class CustomMethods:
                         confirmation_pivot_candles,
                         confirmation_pivot_candles_type,
                         diff_between_maximum_and_twenty_six_point,
-                        close_above_conversion,
+                        low_above_conversion,
                         divergence_confirmation,
                         divergence_percent_diff,
                         entry_price_type,
@@ -77,8 +77,8 @@ class CustomMethods:
                                                                                               diff_value=diff_between_maximum_and_twenty_six_point):
                 continue
 
-            # Check close_above_conversion
-            if close_above_conversion and not self._check_close_above_conversion(df=df,
+            # Check low_above_conversion
+            if low_above_conversion and not self._check_low_above_conversion(df=df,
                                                                                  pivot_index=i,
                                                                                  signal_index=i + look_ahead_num):
                 continue
@@ -114,8 +114,8 @@ class CustomMethods:
         highest_index = df['high'][start_index:signal_index + 1].idxmax()
         return abs(start_index - highest_index) >= diff_value
 
-    def _check_close_above_conversion(self, df, pivot_index, signal_index):
-        return df['close'].iloc[signal_index] > df['tenkan_sen'].iloc[pivot_index]
+    def _check_low_above_conversion(self, df, pivot_index, signal_index):
+        return df['low'].iloc[signal_index] > df['tenkan_sen'].iloc[pivot_index]
 
     def _divergence_confirmation(self, df, pivot_index, percent_diff):
         next_index = pivot_index + 1

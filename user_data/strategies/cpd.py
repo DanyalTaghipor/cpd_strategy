@@ -103,8 +103,8 @@ class CPD(IStrategy):
     # going back 26 candles, is less than a specific number.
     diff_between_maximum_and_twenty_six_point = 5
 
-    # If True, The Close of Last Candle In Pivot Pattern Should Be Greater Than Conversion
-    close_above_conversion = True
+    # If True, The Low of Last Candle In Pivot Pattern Should Be Greater Than Conversion
+    low_above_conversion = True
 
     # If True, CPD needs divergence confirmation too
     divergence_confirmation = True
@@ -224,7 +224,7 @@ class CPD(IStrategy):
                                                       confirmation_pivot_candles=self.confirmation_pivot_candles,
                                                       confirmation_pivot_candles_type=self.confirmation_pivot_candles_type,
                                                       diff_between_maximum_and_twenty_six_point=self.diff_between_maximum_and_twenty_six_point,
-                                                      close_above_conversion=self.close_above_conversion,
+                                                      low_above_conversion=self.low_above_conversion,
                                                       divergence_confirmation=self.divergence_confirmation,
                                                       divergence_percent_diff=self.divergence_percent_diff,
                                                       entry_price_type=self.entry_price_type,
