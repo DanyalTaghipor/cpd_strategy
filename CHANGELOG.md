@@ -2,6 +2,13 @@
 
 
 
+## v3.2.0 (2023-12-07)
+
+### Feature
+
+* feat(CPD): change close above conversion rule (now the low price should be above conversion, in other words, more restriction is added) ([`976043a`](https://github.com/tradefreq/cpd_strategy/commit/976043afdafa0f5cbb522befa4162c53e7126ee3))
+
+
 ## v3.1.1 (2023-12-06)
 
 ### Fix
