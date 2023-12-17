@@ -88,7 +88,7 @@ class CPD(IStrategy):
     custom_sl = 0.3
 
     # Check if the pivot candle has the lowest value compared to, for example, the 10 previous lows.
-    lowest_pivot_range = 7
+    lowest_pivot_range = 5
 
     # Number of Bearish/Bullish Candles After Pivot to Confirm It
     confirmation_pivot_candles = int(os.environ.get('CONFIRMATION_PIVOT_CANDLES', '1'))
@@ -101,7 +101,7 @@ class CPD(IStrategy):
 
     # Check if the difference between the highest pivot and the pivot signal index,
     # going back 26 candles, is less than a specific number.
-    diff_between_maximum_and_twenty_six_point = 5
+    diff_between_maximum_and_twenty_six_point = 2
 
     # If True, The Low of Last Candle In Pivot Pattern Should Be Greater Than Conversion
     low_above_conversion = True
@@ -114,7 +114,7 @@ class CPD(IStrategy):
     divergence_percent_diff = 0.04
 
     # possible values are close and high
-    entry_price_type = 'close'
+    entry_price_type = 'high'
 
     # Check if the distance, in percent, between the base and the entry price is greater than a specific value.
     entry_base_distance = 0.5
