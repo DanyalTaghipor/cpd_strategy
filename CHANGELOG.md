@@ -2,6 +2,13 @@
 
 
 
+## v3.3.0 (2023-12-17)
+
+### Feature
+
+* feat(cpd): update paramaters ([`e64c70b`](https://github.com/tradefreq/cpd_strategy/commit/e64c70b3dabc792ce4d31ba2caf8015f305dfb24))
+
+
 ## v3.2.0 (2023-12-07)
 
 ### Feature
