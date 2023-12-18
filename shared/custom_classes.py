@@ -61,15 +61,16 @@ class CustomMethods:
 
         # Filter based on additional conditions
         for i in df[df['pivot_lows'].notna()].index:
+            if i + look_ahead_num >= len(df):
+                continue
+
             entry_price = df[str.lower(entry_price_type)].iloc[i + look_ahead_num]
 
-            # Confirmation check
-            if confirmation_pivot_candles > 0 and i + confirmation_pivot_candles < len(df):
-                confirmation_cond = self._check_confirmation(df=df, pivot_index=i,
-                                                             signal_index=i + confirmation_pivot_candles,
-                                                             confirmation_pivot_candles_type=confirmation_pivot_candles_type)
-                if not confirmation_cond:
-                    continue
+            confirmation_cond = self._check_confirmation(df=df, pivot_index=i,
+                                                         signal_index=i + confirmation_pivot_candles,
+                                                         confirmation_pivot_candles_type=confirmation_pivot_candles_type)
+            if not confirmation_cond:
+                continue
 
             # Check diff_between_maximum_and_twenty_six_point
             if diff_between_maximum_and_twenty_six_point > 0 and not self._check_maximum_diff(df=df,
