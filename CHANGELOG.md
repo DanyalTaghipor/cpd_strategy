@@ -2,6 +2,13 @@
 
 
 
+## v3.3.1 (2023-12-18)
+
+### Fix
+
+* fix(cpd_find_pivot_lows): fix but for indexing section of getting entry_price ([`5c08329`](https://github.com/tradefreq/cpd_strategy/commit/5c08329673e68a1f09b875e27ea0265c68542c25))
+
+
 ## v3.3.0 (2023-12-17)
 
 ### Feature
